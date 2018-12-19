@@ -1,0 +1,5 @@
+#!/usr/local/bin/ruby -w
+
+require_relative '../lib/alfaces_bot'
+
+AlfacesBot.new.run
