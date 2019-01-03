@@ -1,5 +1,5 @@
-#!/usr/local/bin/ruby -w
+#!/usr/bin/env ruby
 
 require_relative '../lib/alfaces_bot'
 
-AlfacesBot.new.run
+AlfacesBot::Runner.new.run
