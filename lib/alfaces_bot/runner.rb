@@ -9,8 +9,7 @@ module AlfacesBot
         notify(bot, task)
       end
 
-      messages = bot.get_updates(fail_silently: true)
-      messages.compact.each do |message|
+      bot.fetch_updates do |message|
         proccess_message(bot, message)
       end
 
@@ -18,15 +17,12 @@ module AlfacesBot
     end
 
     def tasks_to_notify
+      p Time.now
       DB[:tasks].where(notified: false).where{ notify_at < Time.now }.order(Sequel.desc(:notify_at))
     end
 
     def notify(bot, task)
-      channel = TelegramBot::Channel.new(id: task[:chat_id])
-      message = TelegramBot::OutMessage.new
-      message.chat = channel
-      message.text = "You asked me to remember about: #{task[:task]}"
-      message.send_with(bot)
+      bot.api.send_message(chat_id: task[:chat_id], text: "You asked me to remember about: #{task[:task]}")
 
       DB[:tasks].where(id: task[:id]).update(notified: true)
     end
@@ -35,18 +31,13 @@ module AlfacesBot
       memory = Memory.new(message.chat.id)
       parser = Parser.new(memory)
 
-      command = message.get_command_for(bot)
+      parsed_content = parser.parse(message.text)
+      if parsed_content.is_a?(Task)
+        schedule_for_notification(message, parsed_content)
 
-      message.reply do |reply|
-        parsed_content = parser.parse(command)
-        if parsed_content.is_a?(Task)
-          schedule_for_notification(message, parsed_content)
-          reply.text = "Ok, I can do it for you."
-        else
-          reply.text = parsed_content
-        end
-
-        reply.send_with(bot)
+        bot.api.send_message(chat_id: message.chat.id, text: 'Ok, I can do it for you.')
+      else
+        bot.api.send_message(chat_id: message.chat.id, text: parsed_content)
       end
     end
 
@@ -55,8 +46,9 @@ module AlfacesBot
     end
 
     def run
-      bot = TelegramBot.new(token: ENV.fetch('TELEGRAM_TOKEN'))
-      while_true(bot)
+      Telegram::Bot::Client.run(ENV.fetch('TELEGRAM_TOKEN')) do |bot|
+        while_true(bot)
+      end
     end
   end
 end

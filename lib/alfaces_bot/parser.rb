@@ -1,6 +1,6 @@
 module AlfacesBot
   class Parser
-    MINUTES_REGEX = /me lembre em (?<minutes>\d+) minutos? de (?<task>.*)$/i
+    MINUTES_REGEX = /me lembre em (?<minutes>-?\d+) minutos? de (?<task>.*)$/i
     HOURS_REGEX = /me lembre em (?<hours>\d+) horas? de (?<task>.*)$/i
     DAYS_REGEX = /me lembre em (?<days>\d+) dias? de (?<task>.*)$/i
     DATE_TIME_REGEX = /me lembre em (?<date>\d\d\/\d\d \d\d:\d\d) de (?<task>.*)$/i
