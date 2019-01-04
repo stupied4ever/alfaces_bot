@@ -35,8 +35,33 @@ module AlfacesBot
           return Task.new(task: $~[:task], notify_at: nil)
         when '/to-do', '/todo'
           return list_pending_tasks
-        when /greet/i
-          return { text: 'Hello!' }
+        when /greet/i, '/help'
+          return {
+	    parse_mode: 'Markdown',
+            text: <<-HELP
+	    # Alface's Bot
+
+	    This bot helps you to remember all you need to do. The allowed commends are:
+
+	    ## Remember me to do something in x minutes, hours, days:
+
+	    `/todo 5m task`
+	    `/todo 1h task`
+	    `/todo 1d task`
+
+	    ## Remember me to do something in d/m H:M format:
+
+	    `/todo 13/01 16:20 task`
+
+	    ## Remember me to do something I dont know when:
+
+	    `/todo task`
+
+	    ## Show me all the tasks I have to do
+
+	    `/todo (list all tasks)`
+            HELP
+          }
         else
           return { text: 'I have no idea what it means.' }
         end
