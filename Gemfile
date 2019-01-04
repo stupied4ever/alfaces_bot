@@ -16,4 +16,5 @@ group :test, :development do
   gem 'rspec'
   gem 'pry'
   gem 'timecop'
+  gem 'database_cleaner'
 end

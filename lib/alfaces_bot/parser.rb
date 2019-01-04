@@ -5,6 +5,13 @@ module AlfacesBot
     DAYS_REGEX = /me lembre em (?<days>\d+) dias? de (?<task>.*)$/i
     DATE_TIME_REGEX = /me lembre em (?<date>\d\d\/\d\d \d\d:\d\d) de (?<task>.*)$/i
     TASK_WITHOUT_TIME_REGEX = /me lembre de (?<task>.*)$/i
+    TO_DO_LIST_REGEX = /^(todos?|to-dos?)/i
+
+    attr_accessor :memory
+
+    def initialize(memory)
+      self.memory = memory
+    end
 
     def parse(command)
        case command
@@ -18,6 +25,12 @@ module AlfacesBot
          Task.new(task: $~[:task], notify_at: Time.strptime($~[:date], "%d/%m %H:%M"))
        when TASK_WITHOUT_TIME_REGEX
          Task.new(task: $~[:task], notify_at: nil)
+       when TO_DO_LIST_REGEX
+         to_do_list = memory.to_do_list
+         return 'You have nothing to do' unless to_do_list.to_a.size > 0
+         to_do_list.map.with_index do |task, index|
+           "#{index + 1}) #{task[:task]}"
+         end.join("\n")
        when /greet/i
          'Hello!'
        else
