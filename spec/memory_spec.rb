@@ -16,7 +16,22 @@ module AlfacesBot
         expect(to_do_list.first[:task]).to eq('cerca do jardim')
         expect(to_do_list.first[:notify_at]).to eq(nil)
       end
+    end
 
+    describe '#done' do
+      let(:task) { Task.new(task: 'cerca do jardim', chat_id: chat_id) }
+
+      before do
+        task.save
+      end
+
+      it 'mark task as done' do
+        to_do_list = memory.to_do_list
+
+        expect{ memory.done(task.id) }.to change{
+          memory.to_do_list.to_a.size
+        }.from(1).to(0)
+      end
     end
   end
 end
