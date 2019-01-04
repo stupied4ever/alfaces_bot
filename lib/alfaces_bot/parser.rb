@@ -4,6 +4,7 @@ module AlfacesBot
     HOURS_REGEX = /me lembre em (?<hours>\d+) horas? de (?<task>.*)$/i
     DAYS_REGEX = /me lembre em (?<days>\d+) dias? de (?<task>.*)$/i
     DATE_TIME_REGEX = /me lembre em (?<date>\d\d\/\d\d \d\d:\d\d) de (?<task>.*)$/i
+    TASK_WITHOUT_TIME_REGEX = /me lembre de (?<task>.*)$/i
 
     def parse(command)
        case command
@@ -15,6 +16,8 @@ module AlfacesBot
          Task.new(task: $~[:task], notify_at: $~[:days].to_i.days.from_now)
        when DATE_TIME_REGEX
          Task.new(task: $~[:task], notify_at: Time.strptime($~[:date], "%d/%m %H:%M"))
+       when TASK_WITHOUT_TIME_REGEX
+         Task.new(task: $~[:task], notify_at: nil)
        when /greet/i
          'Hello!'
        else
