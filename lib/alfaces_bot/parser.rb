@@ -1,11 +1,10 @@
 module AlfacesBot
   class Parser
-    MINUTES_REGEX = /me lembre em (?<minutes>-?\d+) minutos? de (?<task>.*)$/i
-    HOURS_REGEX = /me lembre em (?<hours>\d+) horas? de (?<task>.*)$/i
-    DAYS_REGEX = /me lembre em (?<days>\d+) dias? de (?<task>.*)$/i
-    DATE_TIME_REGEX = /me lembre em (?<date>\d\d\/\d\d \d\d:\d\d) de (?<task>.*)$/i
-    TASK_WITHOUT_TIME_REGEX = /me lembre de (?<task>.*)$/i
-    TO_DO_LIST_REGEX = /^(todos?|to-dos?)/i
+    MINUTES_REGEX = /(\/todo (?<minutes>-?\d+)m|me lembre em (?<minutes>-?\d+) minutos? de) (?<task>.*)$/i
+    HOURS_REGEX = /(\/todo (?<hours>-?\d+)h|me lembre em (?<hours>-?\d+) horas? de) (?<task>.*)$/i
+    DAYS_REGEX = /(\/todo (?<days>-?\d+)d|me lembre em (?<days>-?\d+) dias? de) (?<task>.*)$/i
+    DATE_TIME_REGEX = /(\/todo (?<date>\d\d\/\d\d \d\d:\d\d)|me lembre em (?<date>\d\d\/\d\d \d\d:\d\d) de) (?<task>.*)$/i
+    TASK_WITHOUT_TIME_REGEX = /(\/todo|me lembre de) (?<task>.*)$/i
     DONE_TASK = 'What task you have done?'
 
     attr_accessor :memory
@@ -20,7 +19,7 @@ module AlfacesBot
         case message.message.text
         when DONE_TASK
           memory.done(message.data.to_i)
-          return { text: 'Done' }
+          return list_pending_tasks
         end
       else
         case message.text
@@ -34,21 +33,8 @@ module AlfacesBot
           return Task.new(task: $~[:task], notify_at: Time.strptime($~[:date], "%d/%m %H:%M"))
         when TASK_WITHOUT_TIME_REGEX
           return Task.new(task: $~[:task], notify_at: nil)
-        when TO_DO_LIST_REGEX
-          to_do_list = memory.to_do_list
-          return { text: 'You have nothing to do' } if to_do_list.to_a.size == 0
-
-          text = to_do_list.map { |task| " - #{task[:task]}" }.join("\n")
-
-          return { text: text, parse_mode: 'Markdown' }
-        when '/done'
-          to_do_list = memory.to_do_list
-          return { text: 'You have no pending tasks' } if to_do_list.to_a.size == 0
-          kb = to_do_list.map do |task|
-            Telegram::Bot::Types::InlineKeyboardButton.new(text: task[:task], callback_data: task[:id])
-          end
-          markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
-          return { text: DONE_TASK, reply_markup: markup }
+        when '/to-do', '/todo'
+          return list_pending_tasks
         when /greet/i
           return { text: 'Hello!' }
         else
@@ -57,5 +43,19 @@ module AlfacesBot
       end
     end
 
+    private def list_pending_tasks
+      to_do_list = memory.to_do_list
+      return { text: 'You have no pending tasks' } if to_do_list.to_a.size == 0
+
+      options = to_do_list.map do |task|
+        Telegram::Bot::Types::InlineKeyboardButton.new(
+          text: task.text,
+          callback_data: task[:id]
+        )
+      end
+      markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: options)
+
+      return { text: DONE_TASK, reply_markup: markup }
+    end
   end
 end

@@ -55,9 +55,9 @@ module AlfacesBot
         end
 
         it 'answers with a simple message' do
-          message = parser.parse(FakeMessage.new('todos'))
+          message = parser.parse(FakeMessage.new('/to-do'))
 
-          expect(message).to eq({ text: 'You have nothing to do'})
+          expect(message).to eq({ text: 'You have no pending tasks'})
         end
       end
 
@@ -70,9 +70,12 @@ module AlfacesBot
         let(:to_do) { Task.new(task: 'cerca do jardim', chat_id: 1) }
 
         it 'answers with all the things we asked bot to remember' do
-          message = parser.parse(FakeMessage.new('todos'))
+          message = parser.parse(FakeMessage.new('/to-do'))
+          inline_keyboard = message[:reply_markup].inline_keyboard.first.first
 
-          expect(message).to eq({parse_mode: 'Markdown', text: ' - cerca do jardim'})
+          expect(message[:text]).to eq('What task you have done?')
+          expect(inline_keyboard.text).to eq('cerca do jardim')
+          expect(inline_keyboard.callback_data).to eq(to_do.id.to_s)
         end
       end
     end

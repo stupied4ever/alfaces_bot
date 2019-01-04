@@ -7,13 +7,14 @@ module AlfacesBot
     end
 
     def to_do_list
-      DB[:tasks].where(chat_id: self.chat_id.to_s, notify_at: nil, done_at: nil).order(Sequel.desc(:id))
+      Task
+        .where(chat_id: self.chat_id.to_s, notified: false, done_at: nil)
+        .where{ (notify_at == nil) | (notify_at > Time.now) }
+        .order(Sequel.desc(:notify_at), Sequel.desc(:id))
     end
 
     def done(id)
       DB[:tasks].where(id: id).update(done_at: Time.now)
     end
-
-
   end
 end
