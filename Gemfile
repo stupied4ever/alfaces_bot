@@ -11,7 +11,6 @@ gem 'pg'
 gem 'rake'
 gem 'activesupport'
 
-
 group :test, :development do
   gem 'rspec'
   gem 'pry'

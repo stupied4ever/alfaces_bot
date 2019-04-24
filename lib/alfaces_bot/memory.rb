@@ -8,8 +8,7 @@ module AlfacesBot
 
     def to_do_list
       Task
-        .where(chat_id: self.chat_id.to_s, notified: false, done_at: nil)
-        .where{ (notify_at == nil) | (notify_at > Time.now) }
+        .where(chat_id: self.chat_id.to_s, done_at: nil)
         .order(Sequel.desc(:notify_at), Sequel.desc(:id))
     end
 

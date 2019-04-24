@@ -1,9 +1,5 @@
 module AlfacesBot
   class Runner
-    MINUTES_REGEX = /me lembre em (?<minutes>\d+) minutos? de (?<task>.*)$/i
-    HOURS_REGEX = /me lembre em (?<hours>\d+) horas? de (?<task>.*)$/i
-    DAYS_REGEX = /me lembre em (?<days>\d+) dias? de (?<task>.*)$/i
-
     def while_true(bot)
       tasks_to_notify.each do |task|
         notify(bot, task)

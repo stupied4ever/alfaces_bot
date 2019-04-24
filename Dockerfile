@@ -10,4 +10,4 @@ RUN bundle install
 
 COPY . .
 
-CMD ["./bot.rb"]
+CMD ["./bin/bot"]
